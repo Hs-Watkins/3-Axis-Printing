@@ -128,29 +128,35 @@ namespace KDC101Console
             // decimal[] Xpositions = { 8.973m, 8.864m, 8.551m, 8.067m, 7.464m, 6.808m, 6.169m, 5.618m, 5.214m, 5m, 5m, 5.214m, 5.618m, 6.169m, 6.808m, 7.464m, 8.067m, 8.551m, 8.864m, 8.973m };
             // decimal[] Ypositions = { 1.993m, 2.643m, 3.222m, 3.668m, 3.932m, 3.986m, 3.825m, 3.465m, 2.945m, 2.322m, 1.664m, 1.041m, 0.522m, 0.162m, 0m, 0.054m, 0.319m, 0.765m, 1.344m, 1.993m };
 
+
+            Thread MoveZThreadInit = new Thread(() => MoveZ(device3, 20,10));
+            MoveZThreadInit.Start();
+            MoveZThreadInit.Join();
+
             Console.WriteLine("Are You Prepared?");
             string answer = Console.ReadLine();
             Console.WriteLine("Now Proceeding");
 
-            decimal[] Xpositions = { 0, 25m, 25m, 0, 0, 25m, 25m, 0, 0, 25m, 25m, 0, 0, 25m, 25m, };
-            decimal[] Ypositions = { 25m, 25m, 0, 0, 25m, 25m, 0, 0, 25m, 25m, 0, 0, 25m, 25m, 0, };
-            decimal[] Zpositions = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, };
-            byte[] PValues = { 0, 50, 250, 200, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, };
-            int[] VCMValues = { 0, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, };
-            int[] Velocities = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, };
+            decimal[] Xpositions = {0,0,5,5,10,10,15,15,20,20, };
+            decimal[] Ypositions = {15,25,25,15,15,25,25,15,15,25, };
+            decimal[] Zpositions = {7.3m, 7.3m, 7.3m, 7.3m, 7.3m, 7.3m, 7.3m, 7.3m, 7.3m, 7.3m, };
+            byte[] PValues = { 0, 50, 250, 200, 50, 50, 50, 50, 50, 50, };
+            int[] VCMValues = { 0, 50, 50, 50, 50, 50, 50, 50, 50, 50,  };
+            int[] Velocities = { 10, 10, 10, 10, 10, 10, 10, 10, 10,10,  };
 
-            SerialPort port;
-            port = new SerialPort("COM6", 9600, Parity.None, 8, StopBits.One);
+            //SerialPort port;
+            //port = new SerialPort("COM6", 9600, Parity.None, 8, StopBits.One);
 
             // Iterate through XPositions and YPositions Simultaneously and Synchronously
             Console.WriteLine("Actuator is Moving");
+
             for (int i = 0; i < Xpositions.Length; i++)
             {
                 Thread MoveXThread = new Thread(() => MoveX(device1, Xpositions[i], Velocities[i]));
                 Thread MoveYThread = new Thread(() => MoveY(device2, Ypositions[i], Velocities[i]));
                 Thread MoveZThread = new Thread(() => MoveZ(device3, Zpositions[i], Velocities[i]));
 
-                int firstValue = PValues[i];
+                /*int firstValue = PValues[i];
                 int secondValue = 0;
                 int thirdValue = 0;
 
@@ -173,7 +179,7 @@ namespace KDC101Console
                 port.Write(Vals2Send);
                 port.Close();
                 Console.WriteLine("Power Signal: {0}", PValues[i]);
-                Console.WriteLine("VCM Height: {0}", VCMValues[i]);
+                Console.WriteLine("VCM Height: {0}", VCMValues[i]);*/
 
                 // Move the Actuators
                 MoveXThread.Start();
@@ -188,6 +194,15 @@ namespace KDC101Console
                 MoveYThread.Join();
                 MoveZThread.Join();
             }
+
+
+            // Raise head to allow you to remove slide
+
+            Thread MoveZThreadEnd = new Thread(() => MoveZ(device3, 20, 10));
+            MoveZThreadEnd.Start();
+            MoveZThreadEnd.Join();
+
+
 
             //Change the Diode Power Output
             //Make a loop that prints serial output that runs simultaneously with the motion stage
