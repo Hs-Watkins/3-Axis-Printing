@@ -47,11 +47,8 @@ namespace KDC101Console
             // Same for Device 2 and 3
             device2.Connect(serialNo2);
             device2.WaitForSettingsInitialized(5000);
-
             device3.Connect(serialNo3);
             device3.WaitForSettingsInitialized(5000);
-
-
 
             // This calls LoadMotorConfiguration on the device to initialize the 
             // DeviceUnitConverter object required for real world unit parameters.
@@ -65,7 +62,6 @@ namespace KDC101Console
             DeviceConfiguration.DeviceSettingsUseOptionType.UseFileSettings);
 
             // This starts polling the device at intervals of 250ms (0.25s).
-
             device1.StartPolling(250);
             device2.StartPolling(250);
             device3.StartPolling(250);
@@ -79,7 +75,6 @@ namespace KDC101Console
 
             // Needs a delay to give time for the device to be enabled. 
             Thread.Sleep(500);
-
             Console.WriteLine("Is the slide removed?");
             string answer1 = Console.ReadLine();
             Console.WriteLine("Now Homing");
@@ -92,12 +87,10 @@ namespace KDC101Console
             Home2Thread.Start();
             Home3Thread.Start();
 
-            // Wait for the threads to complete
+            // Wait for the homing to complete
             Home1Thread.Join();
             Home2Thread.Join();
             Home3Thread.Join();
-
-            //device1.SetJogVelocityParams();
 
             // move z axis so you can put slide in place
             Thread MoveZThreadInit = new Thread(() => MoveZ(device3, 20,10));
@@ -112,7 +105,7 @@ namespace KDC101Console
             //decimal[] Ypositions = {15, };
             //decimal[] Zpositions = {7.3m, };
 
-            // positional positions - don't start any access on 0  
+            // positional positions - don't start any axis on 0  
 
             decimal[] Xpositions = {0,0,5,5,10,10,15,15,20,20, };
             decimal[] Ypositions = {15,25,25,15,15,25,25,15,15,25, };
@@ -120,7 +113,6 @@ namespace KDC101Console
 
             // power 1/0, start on 0
             byte[] PValues = { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, };
-            //int[] VCMValues = { 0, 50, 50, 50, 50, 50, 50, 50, 50, 50,  };
             int[] Velocities = { 5, 5, 10, 10, 15, 15, 20, 20, 20,20,  };
 
             // add check to see if lengths are same
@@ -146,30 +138,6 @@ namespace KDC101Console
                 port.Close();
                 Console.WriteLine("Power Signal: {0}", PValues[i]);
 
-                /*int secondValue = 0;
-                int thirdValue = 0;
-
-                if (VCMValues[i] > 0)
-                {
-                    secondValue = Math.Abs(VCMValues[i]);
-                    thirdValue = 0;
-                }
-
-                else if (VCMValues[i] < 0)
-                {
-                    secondValue = 0;
-                    thirdValue = Math.Abs(VCMValues[i]);
-                }
-
-                string Vals2Send = $"{firstValue},{secondValue},{thirdValue}";
-                char[] charArray = Vals2Send.ToCharArray();
-
-                port.Open();
-                port.Write(Vals2Send);
-                port.Close();
-                Console.WriteLine("Power Signal: {0}", PValues[i]);
-                Console.WriteLine("VCM Height: {0}", VCMValues[i]);*/
-
                 // Move the Actuators
                 MoveXThread.Start();
                 MoveYThread.Start();
@@ -191,13 +159,6 @@ namespace KDC101Console
             Thread MoveZThreadEnd = new Thread(() => MoveZ(device3, 20, 10));
             MoveZThreadEnd.Start();
             MoveZThreadEnd.Join();
-
-            //Change the Diode Power Output
-            //Make a loop that prints serial output that runs simultaneously with the motion stage
-            //port = new SerialPort("COM6", 9600, Parity.None, 8, StopBits.One);
-            //port.Open();
-            //port.Write("Move");
-            //port.Close();
 
             //Closing the Devices
             //Stop polling devices
