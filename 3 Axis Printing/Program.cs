@@ -116,12 +116,16 @@ namespace KDC101Console
             int[] VelocityArray = { 5, 5, 10, 10, 15, 15, 20, 20, 20,20,  };
 
             // constant values
-            int[] constantVelocity = 5
-            decimal[] constantZPosition = 2.75m
+            int constantVelocity = 5;
+            decimal constantZPosition = 2.75m;
+
+            // initialise variables
+            decimal zPosition = constantZPosition;
+            int velocity = constantVelocity;
 
             //choose if you want constant values
-            chooseConstantVelocity = false
-            chooseConstantZPosition = false
+            bool chooseConstantVelocity = false;
+            bool chooseConstantZPosition = false;
 
             // add check to see if lengths are same
 
@@ -132,23 +136,23 @@ namespace KDC101Console
             // Iterate through XPositions and YPositions Simultaneously and Synchronously
             Console.WriteLine("Actuator is Moving");
 
-            for (int i = 0; i < Xpositions.Length; i++)
+            for (int i = 0; i < XpositionArray.Length; i++)
             {
                 
-                if chooseConstantZPosition==true{
+                if (chooseConstantZPosition==true){
                     zPosition=constantZPosition;
                 }
                 else
                 {
-                    zPosition=ZpositionArray[i]
+                    zPosition = ZpositionArray[i];
                 }
 
-                if chooseConstantVelocity==true{
-                    zPosition=constantVelocity;
+                if (chooseConstantVelocity==true){
+                    velocity=constantVelocity;
                 }
                 else
                 {
-                    zPosition=VelocityArray[i];
+                    velocity=VelocityArray[i];
                 }
                 
 
@@ -156,13 +160,13 @@ namespace KDC101Console
                 Thread MoveYThread = new Thread(() => MoveY(device2, YpositionArray[i], velocity));
                 Thread MoveZThread = new Thread(() => MoveZ(device3, zPosition, velocity));
 
-                int pValue = PValues[i];
+                int pValue = PValuesArray[i];
                 string pSend = pValue.ToString();
 
                 port.Open();
                 port.Write(pSend);
                 port.Close();
-                Console.WriteLine("Power Signal: {0}", PValues[i]);
+                Console.WriteLine("Power Signal: {0}", PValuesArray[i]);
 
                 // Move the Actuators
                 MoveXThread.Start();
