@@ -107,13 +107,21 @@ namespace KDC101Console
 
             // positional positions - don't start any axis on 0  
 
-            decimal[] Xpositions = {0,0,5,5,10,10,15,15,20,20, };
-            decimal[] Ypositions = {15,25,25,15,15,25,25,15,15,25, };
-            decimal[] Zpositions = {2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, };
+            decimal[] XpositionArray = {0,0,5,5,10,10,15,15,20,20, };
+            decimal[] YpositionArray = {15,25,25,15,15,25,25,15,15,25, };
+            decimal[] ZpositionArray = {2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, };
 
             // power 1/0, start on 0
-            byte[] PValues = { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, };
-            int[] Velocities = { 5, 5, 10, 10, 15, 15, 20, 20, 20,20,  };
+            byte[] PValuesArray = { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, };
+            int[] VelocityArray = { 5, 5, 10, 10, 15, 15, 20, 20, 20,20,  };
+
+            // constant values
+            int[] constantVelocity = 5
+            decimal[] constantZPosition = 2.75m
+
+            //choose if you want constant values
+            chooseConstantVelocity = false
+            chooseConstantZPosition = false
 
             // add check to see if lengths are same
 
@@ -126,9 +134,27 @@ namespace KDC101Console
 
             for (int i = 0; i < Xpositions.Length; i++)
             {
-                Thread MoveXThread = new Thread(() => MoveX(device1, Xpositions[i], Velocities[i]));
-                Thread MoveYThread = new Thread(() => MoveY(device2, Ypositions[i], Velocities[i]));
-                Thread MoveZThread = new Thread(() => MoveZ(device3, Zpositions[i], Velocities[i]));
+                
+                if chooseConstantZPosition==true{
+                    zPosition=constantZPosition;
+                }
+                else
+                {
+                    zPosition=ZpositionArray[i]
+                }
+
+                if chooseConstantVelocity==true{
+                    zPosition=constantVelocity;
+                }
+                else
+                {
+                    zPosition=VelocityArray[i];
+                }
+                
+
+                Thread MoveXThread = new Thread(() => MoveX(device1, XpositionArray[i], velocity));
+                Thread MoveYThread = new Thread(() => MoveY(device2, YpositionArray[i], velocity));
+                Thread MoveZThread = new Thread(() => MoveZ(device3, zPosition, velocity));
 
                 int pValue = PValues[i];
                 string pSend = pValue.ToString();
