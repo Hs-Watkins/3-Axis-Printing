@@ -5,10 +5,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Threading;
+using System.Diagnostics;
 using Thorlabs.MotionControl.GenericMotorCLI;
 using Thorlabs.MotionControl.GenericMotorCLI.Settings;
 using Thorlabs.MotionControl.KCube.DCServoCLI;
 using Thorlabs.MotionControl.DeviceManagerCLI;
+using Thorlabs.MotionControl.GenericMotorCLI.AdvancedMotor;
 
 
 namespace KDC101Console
@@ -19,9 +21,74 @@ namespace KDC101Console
         static SerialPort port;
         static void Main(string[] args)
         {
-            // Find the Devices and Begin Communicating with them via USB
-            // Enter the serial number for your device
-            string serialNo1 = "27505282"; // x
+
+            // positional positions - don't start any axis on 0  
+
+            decimal[] XpositionArray = { 0, 0, 5, 5, 10, 10, 15, 15, 20, 20, };
+            decimal[] YpositionArray = { 15, 25, 25, 15, 15, 25, 25, 15, 15, 25, };
+            decimal[] ZpositionArray = { 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, };
+
+            // power 1/0, start on 0
+            byte[] PValuesArray = { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, };
+            int[] VelocityArray = { 2, 2, 1, 1, 1, 1, 2, 2, 2,2 };
+
+            // constant values
+            int constantVelocity = 2;
+            decimal constantZPosition = 2.75m;
+
+            // initialise variables
+            decimal zPosition = constantZPosition;
+            int velocity = constantVelocity;
+            decimal xVel = velocity;
+            decimal yVel = velocity;
+            decimal zVel = velocity;
+
+
+            //choose if you want constant values
+            bool chooseConstantVelocity = false;
+            bool chooseConstantZPosition = true;
+
+            //  check to see if lengths are same
+
+            try
+            {
+                if (chooseConstantVelocity && chooseConstantZPosition)
+                {
+                    Console.WriteLine("Both V and Z are constant");
+                    Console.WriteLine("Checking X, Y, P");
+                    CheckArrayLengths(XpositionArray, YpositionArray, PValuesArray);
+                }
+                else if (chooseConstantVelocity)
+                {
+                    Console.WriteLine("V is constant");
+                    Console.WriteLine("Checking X, Y, Z, P");
+                    CheckArrayLengths(XpositionArray, YpositionArray, ZpositionArray, PValuesArray);
+                }
+                else if (chooseConstantZPosition)
+                {
+                    Console.WriteLine("Z is constant");
+                    Console.WriteLine("Checking X, Y, V, P");
+                    CheckArrayLengths(XpositionArray, YpositionArray, VelocityArray, PValuesArray);
+                }
+                else
+                {
+                    Console.WriteLine("Neither V nor Z constant");
+                    Console.WriteLine("Checking X, Y, Z, P, V");
+                    CheckArrayLengths(XpositionArray, YpositionArray, ZpositionArray, PValuesArray, VelocityArray);
+                }
+
+                Console.WriteLine("All arrays have the same length.");
+            }
+            catch (ArgumentException e)
+            {
+                Debug.WriteLine($"Error: {e.Message}");
+                Environment.Exit(1);
+            }
+
+
+        // Find the Devices and Begin Communicating with them via USB
+        // Enter the serial number for your device
+        string serialNo1 = "27505282"; // x
             string serialNo2 = "27505360"; // y
             string serialNo3 = "27505370"; // z
 
@@ -82,7 +149,7 @@ namespace KDC101Console
             // Home all actuators at once  
             Thread Home1Thread = new Thread(() => Home1(device1));
             Thread Home2Thread = new Thread(() => Home2(device2));
-            Thread Home3Thread = new Thread(() => Home2(device3));
+            Thread Home3Thread = new Thread(() => Home3(device3));
             Home1Thread.Start();
             Home2Thread.Start();
             Home3Thread.Start();
@@ -100,35 +167,6 @@ namespace KDC101Console
             Console.WriteLine("Are You Prepared?");
             string answer = Console.ReadLine();
             Console.WriteLine("Now Proceeding");
-
-            //decimal[] Xpositions = {0, };
-            //decimal[] Ypositions = {15, };
-            //decimal[] Zpositions = {7.3m, };
-
-            // positional positions - don't start any axis on 0  
-
-            decimal[] XpositionArray = {0,0,5,5,10,10,15,15,20,20, };
-            decimal[] YpositionArray = {15,25,25,15,15,25,25,15,15,25, };
-            decimal[] ZpositionArray = {2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, };
-
-            // power 1/0, start on 0
-            byte[] PValuesArray = { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, };
-            int[] VelocityArray = { 5, 5, 10, 10, 15, 15, 20, 20, 20,20,  };
-
-            // constant values
-            int constantVelocity = 5;
-            decimal constantZPosition = 2.75m;
-
-            // initialise variables
-            decimal zPosition = constantZPosition;
-            int velocity = constantVelocity;
-
-            //choose if you want constant values
-            bool chooseConstantVelocity = false;
-            bool chooseConstantZPosition = false;
-
-            // add check to see if lengths are same
-
 
             //SerialPort port
             port = new SerialPort("COM3", 9600, Parity.None, 8, StopBits.One);
@@ -154,10 +192,51 @@ namespace KDC101Console
                 {
                     velocity=VelocityArray[i];
                 }
+
+                /*
                 
+                //calculate synced velocity
+                
+                if (i == 0)
+                {
+                    decimal xPos = XpositionArray[i];
+                    decimal yPos = YpositionArray[i];
+                    decimal zPos = ZpositionArray[i];
+
+                    decimal xTime = xPos / velocity;
+                    decimal yTime = yPos / velocity;
+                    decimal zTime = zPos / velocity;
+
+                    decimal longestTime = Math.Max(xTime, Math.Max(yTime, zTime));
+
+                    xVel = xPos / longestTime;
+                    yVel = yPos / longestTime;
+                    zVel = zPos / longestTime;
+                }
+
+                else
+                {
+                    decimal xPos = XpositionArray[i]- XpositionArray[i-1];
+                    decimal yPos = YpositionArray[i]- YpositionArray[i-1];
+                    decimal zPos = ZpositionArray[i] - ZpositionArray[i - 1];
+
+                    decimal xTime = xPos / velocity;
+                    decimal yTime = yPos / velocity;
+                    decimal zTime = zPos / velocity;
+
+                    decimal longestTime = Math.Max(xTime, Math.Max(yTime, zTime));
+
+                    xVel = xPos / longestTime;
+                    yVel = yPos / longestTime;
+                    zVel = zPos / longestTime;
+
+                }
+                */
 
                 Thread MoveXThread = new Thread(() => MoveX(device1, XpositionArray[i], velocity));
+
                 Thread MoveYThread = new Thread(() => MoveY(device2, YpositionArray[i], velocity));
+
                 Thread MoveZThread = new Thread(() => MoveZ(device3, zPosition, velocity));
 
                 int pValue = PValuesArray[i];
@@ -235,5 +314,19 @@ namespace KDC101Console
         {
             device3.Home(60000);
         }
+
+        static void CheckArrayLengths(params Array[] arrays)
+        {
+            int length = arrays[0].Length;
+            for (int i = 1; i < arrays.Length; i++)
+            {
+                if (arrays[i].Length != length)
+                {
+                    throw new ArgumentException("Arrays must have the same length.");
+                }
+            }
+        }
+
+
     }
 }
