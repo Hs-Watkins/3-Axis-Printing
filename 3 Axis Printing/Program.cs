@@ -142,7 +142,7 @@ namespace KDC101Console
 
             // Needs a delay to give time for the device to be enabled. 
             Thread.Sleep(500);
-            Console.WriteLine("Is the slide removed?");
+            Console.WriteLine("Is the slide removed? Press enter to continue");
             string answer1 = Console.ReadLine();
             Console.WriteLine("Now Homing");
 
@@ -163,8 +163,8 @@ namespace KDC101Console
             Thread MoveZThreadInit = new Thread(() => MoveZ(device3, 20,10));
             MoveZThreadInit.Start();
             MoveZThreadInit.Join();
-            Console.WriteLine("Make sure power supply is on");
-            Console.WriteLine("Are You Prepared?");
+            Console.WriteLine("Make sure power supply is on and slide is in place.");
+            Console.WriteLine("Press enter to continue");
             string answer = Console.ReadLine();
             Console.WriteLine("Now Proceeding");
 
@@ -172,7 +172,7 @@ namespace KDC101Console
             port = new SerialPort("COM3", 9600, Parity.None, 8, StopBits.One);
 
             // Iterate through XPositions and YPositions Simultaneously and Synchronously
-            Console.WriteLine("Actuator is Moving");
+            Console.WriteLine("Actuators are moving");
 
             for (int i = 0; i < XpositionArray.Length; i++)
             {
@@ -193,7 +193,7 @@ namespace KDC101Console
                     velocity=VelocityArray[i];
                 }
 
-                /*
+                
                 
                 //calculate synced velocity
                 
@@ -231,13 +231,15 @@ namespace KDC101Console
                     zVel = zPos / longestTime;
 
                 }
-                */
+                
+                Console.WriteLine("Input velocities: {0}, {1}, {2}", xVel, yVel, zVel);
 
-                Thread MoveXThread = new Thread(() => MoveX(device1, XpositionArray[i], velocity));
 
-                Thread MoveYThread = new Thread(() => MoveY(device2, YpositionArray[i], velocity));
+                Thread MoveXThread = new Thread(() => MoveX(device1, XpositionArray[i], xVel));
 
-                Thread MoveZThread = new Thread(() => MoveZ(device3, zPosition, velocity));
+                Thread MoveYThread = new Thread(() => MoveY(device2, YpositionArray[i], yVel));
+
+                Thread MoveZThread = new Thread(() => MoveZ(device3, zPosition, zVel));
 
                 int pValue = PValuesArray[i];
                 string pSend = pValue.ToString();
@@ -283,19 +285,19 @@ namespace KDC101Console
             Console.WriteLine("Your print is finished. Press any key to exit");
             Console.ReadKey();
         }
-        static void MoveX(KCubeDCServo device1, decimal Xposition, int Velocities)
+        static void MoveX(KCubeDCServo device1, decimal Xposition, decimal Velocities)
         {
             device1.SetVelocityParams(acceleration: 100, maxVelocity: Velocities);
             device1.MoveTo(Xposition, 20000);
             Console.WriteLine("Current X position: {0}", device1.Position);
         }
-        static void MoveY(KCubeDCServo device2, decimal Yposition, int Velocities)
+        static void MoveY(KCubeDCServo device2, decimal Yposition, decimal Velocities)
         {
             device2.SetVelocityParams(acceleration: 100, maxVelocity: Velocities);
             device2.MoveTo(Yposition, 20000);
             Console.WriteLine("Current Y position: {0}", device2.Position);
         }
-        static void MoveZ(KCubeDCServo device3, decimal Zposition, int Velocities)
+        static void MoveZ(KCubeDCServo device3, decimal Zposition, decimal Velocities)
         {
             device3.SetVelocityParams(acceleration: 100, maxVelocity: Velocities);
             device3.MoveTo(Zposition, 20000);
