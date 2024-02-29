@@ -237,7 +237,7 @@ namespace KDC101Console
 
                 Thread MoveXThread = new Thread(() => MoveX(device1, XpositionArray[i], xVel));
 
-                Thread MoveYThread = new Thread(() => MoveY(device2, YpositionArray[i], yVel));
+                Thread MoveYThread = new Thread(() => MoveY(device2, YpositionArray[i], velocity));
 
                 Thread MoveZThread = new Thread(() => MoveZ(device3, zPosition, zVel));
 
