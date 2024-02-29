@@ -193,7 +193,7 @@ namespace KDC101Console
                     velocity=VelocityArray[i];
                 }
 
-                /*
+                
                 
                 //calculate synced velocity
                 
@@ -231,13 +231,15 @@ namespace KDC101Console
                     zVel = zPos / longestTime;
 
                 }
-                */
+                
+                Console.WriteLine("Input velocities: ", xVel, yVel, zVel);
 
-                Thread MoveXThread = new Thread(() => MoveX(device1, XpositionArray[i], velocity));
 
-                Thread MoveYThread = new Thread(() => MoveY(device2, YpositionArray[i], velocity));
+                Thread MoveXThread = new Thread(() => MoveX(device1, XpositionArray[i], xVel));
 
-                Thread MoveZThread = new Thread(() => MoveZ(device3, zPosition, velocity));
+                Thread MoveYThread = new Thread(() => MoveY(device2, YpositionArray[i], yVel));
+
+                Thread MoveZThread = new Thread(() => MoveZ(device3, zPosition, zVel));
 
                 int pValue = PValuesArray[i];
                 string pSend = pValue.ToString();
@@ -283,19 +285,19 @@ namespace KDC101Console
             Console.WriteLine("Your print is finished. Press any key to exit");
             Console.ReadKey();
         }
-        static void MoveX(KCubeDCServo device1, decimal Xposition, int Velocities)
+        static void MoveX(KCubeDCServo device1, decimal Xposition, decimal Velocities)
         {
             device1.SetVelocityParams(acceleration: 100, maxVelocity: Velocities);
             device1.MoveTo(Xposition, 20000);
             Console.WriteLine("Current X position: {0}", device1.Position);
         }
-        static void MoveY(KCubeDCServo device2, decimal Yposition, int Velocities)
+        static void MoveY(KCubeDCServo device2, decimal Yposition, decimal Velocities)
         {
             device2.SetVelocityParams(acceleration: 100, maxVelocity: Velocities);
             device2.MoveTo(Yposition, 20000);
             Console.WriteLine("Current Y position: {0}", device2.Position);
         }
-        static void MoveZ(KCubeDCServo device3, decimal Zposition, int Velocities)
+        static void MoveZ(KCubeDCServo device3, decimal Zposition, decimal Velocities)
         {
             device3.SetVelocityParams(acceleration: 100, maxVelocity: Velocities);
             device3.MoveTo(Zposition, 20000);
