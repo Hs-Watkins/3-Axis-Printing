@@ -24,21 +24,21 @@ namespace KDC101Console
 
             // positional positions - don't start any axis on 0  
 
-            decimal[] XpositionArray = { 0, 0, 5, 5, 10, 10, 15, 15, 20, 20, };
+            decimal[] XpositionArray = { 0,  0,   5, 5,  10, 10, 15, 15, 20, 20, };
             decimal[] YpositionArray = { 15, 25, 25, 15, 15, 25, 25, 15, 15, 25, };
             decimal[] ZpositionArray = { 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, };
 
             // power 1/0, start on 0
             byte[] PValuesArray = { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, };
-            int[] VelocityArray = { 2, 2, 1, 1, 1, 1, 2, 2, 2,2 };
+            decimal[] VelocityArray = { 2, 2, 1, 1, 1, 1, 2, 2, 2,2 };
 
             // constant values
-            int constantVelocity = 2;
+            decimal constantVelocity = 2m;
             decimal constantZPosition = 2.75m;
 
             // initialise variables
             decimal zPosition = constantZPosition;
-            int velocity = constantVelocity;
+            decimal velocity = constantVelocity;
             decimal xVel = velocity;
             decimal yVel = velocity;
             decimal zVel = velocity;
@@ -88,7 +88,7 @@ namespace KDC101Console
 
         // Find the Devices and Begin Communicating with them via USB
         // Enter the serial number for your device
-        string serialNo1 = "27505282"; // x
+            string serialNo1 = "27505282"; // x
             string serialNo2 = "27505360"; // y
             string serialNo3 = "27505370"; // z
 
@@ -167,6 +167,9 @@ namespace KDC101Console
             Console.WriteLine("Press enter to continue");
             string answer = Console.ReadLine();
             Console.WriteLine("Now Proceeding");
+            Thread ReturnZThreadInit = new Thread(() => MoveZ(device3, 0, 10));
+            ReturnZThreadInit.Start();
+            ReturnZThreadInit.Join();
 
             //SerialPort port
             port = new SerialPort("COM3", 9600, Parity.None, 8, StopBits.One);
@@ -176,27 +179,29 @@ namespace KDC101Console
 
             for (int i = 0; i < XpositionArray.Length; i++)
             {
-                
-                if (chooseConstantZPosition==true){
-                    zPosition=constantZPosition;
+
+                if (chooseConstantZPosition == true)
+                {
+                    zPosition = constantZPosition;
                 }
                 else
                 {
                     zPosition = ZpositionArray[i];
                 }
 
-                if (chooseConstantVelocity==true){
-                    velocity=constantVelocity;
+                if (chooseConstantVelocity == true)
+                {
+                    velocity = constantVelocity;
                 }
                 else
                 {
-                    velocity=VelocityArray[i];
+                    velocity = VelocityArray[i];
                 }
 
-                
-                
+
+
                 //calculate synced velocity
-                
+
                 if (i == 0)
                 {
                     decimal xPos = XpositionArray[i];
@@ -209,15 +214,16 @@ namespace KDC101Console
 
                     decimal longestTime = Math.Max(xTime, Math.Max(yTime, zTime));
 
-                    xVel = xPos / longestTime;
-                    yVel = yPos / longestTime;
-                    zVel = zPos / longestTime;
+                    xVel = (decimal)(xPos / longestTime);
+                    yVel = (decimal)(yPos / longestTime);
+                    zVel = (decimal)(zPos / longestTime);
+                    
                 }
 
                 else
                 {
-                    decimal xPos = XpositionArray[i]- XpositionArray[i-1];
-                    decimal yPos = YpositionArray[i]- YpositionArray[i-1];
+                    decimal xPos = XpositionArray[i] - XpositionArray[i - 1];
+                    decimal yPos = YpositionArray[i] - YpositionArray[i - 1];
                     decimal zPos = ZpositionArray[i] - ZpositionArray[i - 1];
 
                     decimal xTime = xPos / velocity;
@@ -226,18 +232,21 @@ namespace KDC101Console
 
                     decimal longestTime = Math.Max(xTime, Math.Max(yTime, zTime));
 
-                    xVel = xPos / longestTime;
-                    yVel = yPos / longestTime;
-                    zVel = zPos / longestTime;
+                    xVel = (decimal)(xPos / longestTime);
+                    yVel = (decimal)(yPos / longestTime);
+                    zVel = (decimal)(zPos / longestTime);
 
                 }
-                
-                Console.WriteLine("Input velocities: {0}, {1}, {2}", xVel, yVel, zVel);
 
+
+
+
+                Console.WriteLine("Input velocities: {0}, {1}, {2}", xVel.GetType(), yVel.GetType(), zVel.GetType());
+                Console.WriteLine("Input velocities: {0}, {1}, {2}", xVel, yVel, zVel);
 
                 Thread MoveXThread = new Thread(() => MoveX(device1, XpositionArray[i], xVel));
 
-                Thread MoveYThread = new Thread(() => MoveY(device2, YpositionArray[i], velocity));
+                Thread MoveYThread = new Thread(() => MoveY(device2, YpositionArray[i], yVel));
 
                 Thread MoveZThread = new Thread(() => MoveZ(device3, zPosition, zVel));
 
@@ -249,18 +258,18 @@ namespace KDC101Console
                 port.Close();
                 Console.WriteLine("Power Signal: {0}", PValuesArray[i]);
 
-                // Move the Actuators
-                MoveXThread.Start();
-                MoveYThread.Start();
-                MoveZThread.Start();
 
-                // Wait for Move to Finish
-                MoveXThread.Join();
-                MoveYThread.Join();
-                MoveZThread.Join();
+                if (xVel != 0m) { MoveXThread.Start(); }
+                if (yVel != 0m) { MoveYThread.Start(); }
+                if (zVel != 0m) { MoveZThread.Start(); }
+
+                if (xVel != 0m) { MoveXThread.Join(); }
+                if (yVel != 0m) { MoveYThread.Join(); }
+                if (zVel != 0m) { MoveZThread.Join(); }
+
             }
 
-            // turn off laser
+                // turn off laser
             port.Open();
             port.Write("0");
             port.Close();
@@ -288,19 +297,19 @@ namespace KDC101Console
         static void MoveX(KCubeDCServo device1, decimal Xposition, decimal Velocities)
         {
             device1.SetVelocityParams(acceleration: 100, maxVelocity: Velocities);
-            device1.MoveTo(Xposition, 20000);
+            device1.MoveTo(Xposition, 200000);
             Console.WriteLine("Current X position: {0}", device1.Position);
         }
         static void MoveY(KCubeDCServo device2, decimal Yposition, decimal Velocities)
         {
             device2.SetVelocityParams(acceleration: 100, maxVelocity: Velocities);
-            device2.MoveTo(Yposition, 20000);
+            device2.MoveTo(Yposition, 200000);
             Console.WriteLine("Current Y position: {0}", device2.Position);
         }
         static void MoveZ(KCubeDCServo device3, decimal Zposition, decimal Velocities)
         {
             device3.SetVelocityParams(acceleration: 100, maxVelocity: Velocities);
-            device3.MoveTo(Zposition, 20000);
+            device3.MoveTo(Zposition, 200000);
             Console.WriteLine("Current Z position: {0}", device3.Position);
         }
 
