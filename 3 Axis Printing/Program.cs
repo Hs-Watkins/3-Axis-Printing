@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO.Ports;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,6 +12,10 @@ using Thorlabs.MotionControl.KCube.DCServoCLI;
 using Thorlabs.MotionControl.DeviceManagerCLI;
 
 
+// SIMULATION //
+
+// If you want to start a simulation search for each SIMULATION_EDIT and follow instructions
+
 namespace KDC101Console
 {
     class Program
@@ -19,8 +24,81 @@ namespace KDC101Console
         static SerialPort port;
         static void Main(string[] args)
         {
+
+            // SIMULATION_EDIT
+            // uncomment this line
+
+            //SimulationManager.Instance.InitializeSimulations();
+
+            // positional positions - don't start any axis on 0  
+
+            decimal[] XpositionArray = { 0, 0, 5, 5, 10, 10, 15, 15, 20, 20, };
+            decimal[] YpositionArray = { 15, 25, 25, 15, 15, 25, 25, 15, 15, 25, };
+            decimal[] ZpositionArray = { 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, };
+
+            // power 1/0, start on 0
+            byte[] PValuesArray = { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, };
+            int[] VelocityArray = { 2, 2, 1, 1, 1, 1, 2, 2, 2, 2 };
+
+            // constant values
+            int constantVelocity = 2;
+            decimal constantZPosition = 2.75m;
+
+            // initialise variables
+            decimal zPosition = constantZPosition;
+            int velocity = constantVelocity;
+
+
+            //choose if you want constant values
+            bool chooseConstantVelocity = false;
+            bool chooseConstantZPosition = true;
+
+            //  check to see if lengths are same
+
+            try
+            {
+                if (chooseConstantVelocity && chooseConstantZPosition)
+                {
+                    Console.WriteLine("Both V and Z are constant");
+                    Console.WriteLine("Checking X, Y, P");
+                    CheckArrayLengths(XpositionArray, YpositionArray, PValuesArray);
+                }
+                else if (chooseConstantVelocity)
+                {
+                    Console.WriteLine("V is constant");
+                    Console.WriteLine("Checking X, Y, Z, P");
+                    CheckArrayLengths(XpositionArray, YpositionArray, ZpositionArray, PValuesArray);
+                }
+                else if (chooseConstantZPosition)
+                {
+                    Console.WriteLine("Z is constant");
+                    Console.WriteLine("Checking X, Y, V, P");
+                    CheckArrayLengths(XpositionArray, YpositionArray, VelocityArray, PValuesArray);
+                }
+                else
+                {
+                    Console.WriteLine("Neither V nor Z constant");
+                    Console.WriteLine("Checking X, Y, Z, P, V");
+                    CheckArrayLengths(XpositionArray, YpositionArray, ZpositionArray, PValuesArray, VelocityArray);
+                }
+
+                Console.WriteLine("All arrays have the same length.");
+            }
+            catch (ArgumentException e)
+            {
+                Debug.WriteLine($"Error: {e.Message}");
+                Environment.Exit(1);
+            }
+
             // Find the Devices and Begin Communicating with them via USB
             // Enter the serial number for your device
+
+            // SIMULATION_EDIT
+            // Replace three lines below
+
+            //string serialNo1 = "27000001"; // x
+            //string serialNo2 = "27000002"; // y
+            //string serialNo3 = "27000003"; // z
             string serialNo1 = "27505282"; // x
             string serialNo2 = "27505360"; // y
             string serialNo3 = "27505370"; // z
@@ -75,7 +153,7 @@ namespace KDC101Console
 
             // Needs a delay to give time for the device to be enabled. 
             Thread.Sleep(500);
-            Console.WriteLine("Is the slide removed?");
+            Console.WriteLine("Is the slide removed? Press enter to continue");
             string answer1 = Console.ReadLine();
             Console.WriteLine("Now Homing");
 
@@ -96,39 +174,14 @@ namespace KDC101Console
             Thread MoveZThreadInit = new Thread(() => MoveZ(device3, 20,10));
             MoveZThreadInit.Start();
             MoveZThreadInit.Join();
-            Console.WriteLine("Make sure power supply is on");
-            Console.WriteLine("Are You Prepared?");
+            Console.WriteLine("Make sure power supply is on and slide is in place.");
+            Console.WriteLine("Press enter to continue");
             string answer = Console.ReadLine();
             Console.WriteLine("Now Proceeding");
 
-            //decimal[] Xpositions = {0, };
-            //decimal[] Ypositions = {15, };
-            //decimal[] Zpositions = {7.3m, };
+            // SIMULATION_EDIT
 
-            // positional positions - don't start any axis on 0  
-
-            decimal[] XpositionArray = {0,0,5,5,10,10,15,15,20,20, };
-            decimal[] YpositionArray = {15,25,25,15,15,25,25,15,15,25, };
-            decimal[] ZpositionArray = {2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, };
-
-            // power 1/0, start on 0
-            byte[] PValuesArray = { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, };
-            int[] VelocityArray = { 5, 5, 10, 10, 15, 15, 20, 20, 20,20,  };
-
-            // constant values
-            int constantVelocity = 5;
-            decimal constantZPosition = 2.75m;
-
-            // initialise variables
-            decimal zPosition = constantZPosition;
-            int velocity = constantVelocity;
-
-            //choose if you want constant values
-            bool chooseConstantVelocity = false;
-            bool chooseConstantZPosition = false;
-
-            // add check to see if lengths are same
-
+            // Comment out the next line starting with 'port'
 
             //SerialPort port
             port = new SerialPort("COM3", 9600, Parity.None, 8, StopBits.One);
@@ -163,10 +216,17 @@ namespace KDC101Console
                 int pValue = PValuesArray[i];
                 string pSend = pValue.ToString();
 
+                //SIMULATION_EDIT
+                // Comment out this section
+
                 port.Open();
                 port.Write(pSend);
                 port.Close();
                 Console.WriteLine("Power Signal: {0}", PValuesArray[i]);
+                
+                // End of simulation Edit
+
+
 
                 // Move the Actuators
                 MoveXThread.Start();
@@ -179,11 +239,17 @@ namespace KDC101Console
                 MoveZThread.Join();
             }
 
+           // SIMULATION_EDIT
+           // Comment out this section
+            
             // turn off laser
             port.Open();
             port.Write("0");
             port.Close();
             Console.WriteLine("Laser Off");
+
+            // End of simulation edit
+
 
             // Raise head to allow you to remove slide
             Thread MoveZThreadEnd = new Thread(() => MoveZ(device3, 20, 10));
@@ -203,6 +269,11 @@ namespace KDC101Console
 
             Console.WriteLine("Your print is finished. Press any key to exit");
             Console.ReadKey();
+
+            // SIMULATION_EDIT
+            // Uncomment this line
+
+            //SimulationManager.Instance.UninitializeSimulations();
         }
         static void MoveX(KCubeDCServo device1, decimal Xposition, int Velocities)
         {
@@ -234,6 +305,18 @@ namespace KDC101Console
         static void Home3(KCubeDCServo device3)
         {
             device3.Home(60000);
+        }
+
+        static void CheckArrayLengths(params Array[] arrays)
+        {
+            int length = arrays[0].Length;
+            for (int i = 1; i < arrays.Length; i++)
+            {
+                if (arrays[i].Length != length)
+                {
+                    throw new ArgumentException("Arrays must have the same length.");
+                }
+            }
         }
     }
 }
