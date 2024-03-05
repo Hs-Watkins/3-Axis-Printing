@@ -107,17 +107,17 @@ namespace KDC101Console
 
             // positional positions - don't start any axis on 0  
 
-            decimal[] XpositionArray = {0,0,5,5,10,10,15,15,20,20, };
-            decimal[] YpositionArray = {15,25,25,15,15,25,25,15,15,25, };
-            decimal[] ZpositionArray = {2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, };
+            decimal[] XpositionArray = {5, 5,10,10,15,15,20,20,25,25, };
+            decimal[] YpositionArray = {5,15,15, 5, 5,15,15, 5, 5,15, };
+            decimal[] ZpositionArray = {4.3m, 4.3m, 4.3m, 4.3m, 4.3m, 4.3m, 4.3m, 4.3m, 4.3m, 4.3m, };
 
             // power 1/0, start on 0
             byte[] PValuesArray = { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, };
-            int[] VelocityArray = { 5, 5, 10, 10, 15, 15, 20, 20, 20,20,  };
+            int[] VelocityArray = { 1, 1, 1, 1, 1, 2, 2, 2, 2, 3,  };
 
             // constant values
-            int constantVelocity = 5;
-            decimal constantZPosition = 2.75m;
+            int constantVelocity = 1;
+            decimal constantZPosition = 4.3m;
 
             // initialise variables
             decimal zPosition = constantZPosition;
@@ -125,7 +125,7 @@ namespace KDC101Console
 
             //choose if you want constant values
             bool chooseConstantVelocity = false;
-            bool chooseConstantZPosition = false;
+            bool chooseConstantZPosition = true;
 
             // add check to see if lengths are same
 
