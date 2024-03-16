@@ -12,26 +12,24 @@ using Thorlabs.MotionControl.KCube.DCServoCLI;
 using Thorlabs.MotionControl.DeviceManagerCLI;
 
 
-// SIMULATION //
-
-// If you want to start a simulation search for each SIMULATION_EDIT and follow instructions
-
 namespace KDC101Console
 {
     class Program
     {
+        // declare if simulation
+        static bool SimulationTrue = true;
+
         // declare the serial port
         static SerialPort port;
         static void Main(string[] args)
         {
-
-            // SIMULATION_EDIT
-            // uncomment this line
-
-            //SimulationManager.Instance.InitializeSimulations();
+            // initialise simulation
+            if (SimulationTrue == true)
+            {
+                SimulationManager.Instance.InitializeSimulations();
+            }
 
             // positional positions - don't start any axis on 0  
-
             decimal[] XpositionArray = { 0, 0, 5, 5, 10, 10, 15, 15, 20, 20, };
             decimal[] YpositionArray = { 15, 25, 25, 15, 15, 25, 25, 15, 15, 25, };
             decimal[] ZpositionArray = { 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, };
@@ -54,7 +52,6 @@ namespace KDC101Console
             bool chooseConstantZPosition = true;
 
             //  check to see if lengths are same
-
             try
             {
                 if (chooseConstantVelocity && chooseConstantZPosition)
@@ -81,7 +78,6 @@ namespace KDC101Console
                     Console.WriteLine("Checking X, Y, Z, P, V");
                     CheckArrayLengths(XpositionArray, YpositionArray, ZpositionArray, PValuesArray, VelocityArray);
                 }
-
                 Console.WriteLine("All arrays have the same length.");
             }
             catch (ArgumentException e)
@@ -93,15 +89,22 @@ namespace KDC101Console
             // Find the Devices and Begin Communicating with them via USB
             // Enter the serial number for your device
 
-            // SIMULATION_EDIT
-            // Replace three lines below
+            string serialNo1="";
+            string serialNo2="";
+            string serialNo3="";
 
-            //string serialNo1 = "27000001"; // x
-            //string serialNo2 = "27000002"; // y
-            //string serialNo3 = "27000003"; // z
-            string serialNo1 = "27505282"; // x
-            string serialNo2 = "27505360"; // y
-            string serialNo3 = "27505370"; // z
+            if (SimulationTrue == true)
+            {
+                serialNo1 = "27000001"; // x
+                serialNo2 = "27000002"; // y
+                serialNo3 = "27000003"; // z
+            }
+            else
+            {
+                serialNo1 = "27505282"; // x
+                serialNo2 = "27505360"; // y
+                serialNo3 = "27505370"; // z
+            }
 
             DeviceManagerCLI.BuildDeviceList();
 
@@ -157,18 +160,22 @@ namespace KDC101Console
             string answer1 = Console.ReadLine();
             Console.WriteLine("Now Homing");
 
-            // Home all actuators at once  
-            Thread Home1Thread = new Thread(() => Home1(device1));
-            Thread Home2Thread = new Thread(() => Home2(device2));
-            Thread Home3Thread = new Thread(() => Home2(device3));
-            Home1Thread.Start();
-            Home2Thread.Start();
-            Home3Thread.Start();
+            if (SimulationTrue == false)
+            {
+                // Home all actuators at once  
+                Thread Home1Thread = new Thread(() => Home1(device1));
+                Thread Home2Thread = new Thread(() => Home2(device2));
+                Thread Home3Thread = new Thread(() => Home2(device3));
+                Home1Thread.Start();
+                Home2Thread.Start();
+                Home3Thread.Start();
 
-            // Wait for the homing to complete
-            Home1Thread.Join();
-            Home2Thread.Join();
-            Home3Thread.Join();
+                // Wait for the homing to complete
+                Home1Thread.Join();
+                Home2Thread.Join();
+                Home3Thread.Join();
+            }
+            
 
             // move z axis so you can put slide in place
             Thread MoveZThreadInit = new Thread(() => MoveZ(device3, 20,10));
@@ -179,12 +186,11 @@ namespace KDC101Console
             string answer = Console.ReadLine();
             Console.WriteLine("Now Proceeding");
 
-            // SIMULATION_EDIT
-
-            // Comment out the next line starting with 'port'
-
-            //SerialPort port
-            port = new SerialPort("COM3", 9600, Parity.None, 8, StopBits.One);
+            if (SimulationTrue == false)
+            {
+                //SerialPort port
+                port = new SerialPort("COM3", 9600, Parity.None, 8, StopBits.One);
+            }
 
             // Iterate through XPositions and YPositions Simultaneously and Synchronously
             Console.WriteLine("Actuator is Moving");
@@ -207,7 +213,6 @@ namespace KDC101Console
                 {
                     velocity=VelocityArray[i];
                 }
-                
 
                 Thread MoveXThread = new Thread(() => MoveX(device1, XpositionArray[i], velocity));
                 Thread MoveYThread = new Thread(() => MoveY(device2, YpositionArray[i], velocity));
@@ -216,17 +221,13 @@ namespace KDC101Console
                 int pValue = PValuesArray[i];
                 string pSend = pValue.ToString();
 
-                //SIMULATION_EDIT
-                // Comment out this section
-
-                port.Open();
-                port.Write(pSend);
-                port.Close();
-                Console.WriteLine("Power Signal: {0}", PValuesArray[i]);
-                
-                // End of simulation Edit
-
-
+                if (SimulationTrue == false)
+                {
+                    port.Open();
+                    port.Write(pSend);
+                    port.Close();
+                    Console.WriteLine("Power Signal: {0}", PValuesArray[i]);
+                }
 
                 // Move the Actuators
                 MoveXThread.Start();
@@ -237,20 +238,19 @@ namespace KDC101Console
                 MoveXThread.Join();
                 MoveYThread.Join();
                 MoveZThread.Join();
+
+                Console.WriteLine("");
             }
 
-           // SIMULATION_EDIT
-           // Comment out this section
+            if (SimulationTrue == false)
+            {
+                // turn off laser
+                port.Open();
+                port.Write("0");
+                port.Close();
+                Console.WriteLine("Laser Off");
+            }
             
-            // turn off laser
-            port.Open();
-            port.Write("0");
-            port.Close();
-            Console.WriteLine("Laser Off");
-
-            // End of simulation edit
-
-
             // Raise head to allow you to remove slide
             Thread MoveZThreadEnd = new Thread(() => MoveZ(device3, 20, 10));
             MoveZThreadEnd.Start();
@@ -270,28 +270,31 @@ namespace KDC101Console
             Console.WriteLine("Your print is finished. Press any key to exit");
             Console.ReadKey();
 
-            // SIMULATION_EDIT
-            // Uncomment this line
-
-            //SimulationManager.Instance.UninitializeSimulations();
+            if (SimulationTrue == true)
+            {
+                SimulationManager.Instance.UninitializeSimulations();
+            }
         }
         static void MoveX(KCubeDCServo device1, decimal Xposition, int Velocities)
         {
             device1.SetVelocityParams(acceleration: 100, maxVelocity: Velocities);
             device1.MoveTo(Xposition, 20000);
-            Console.WriteLine("Current X position: {0}", device1.Position);
+            Console.WriteLine("Input X velocity: {0}", Velocities);
+            Console.WriteLine("Final X position: {0}", device1.Position);
         }
         static void MoveY(KCubeDCServo device2, decimal Yposition, int Velocities)
         {
             device2.SetVelocityParams(acceleration: 100, maxVelocity: Velocities);
             device2.MoveTo(Yposition, 20000);
-            Console.WriteLine("Current Y position: {0}", device2.Position);
+            Console.WriteLine("Input Y velocity: {0}", Velocities);
+            Console.WriteLine("Final Y position: {0}", device2.Position);
         }
         static void MoveZ(KCubeDCServo device3, decimal Zposition, int Velocities)
         {
             device3.SetVelocityParams(acceleration: 100, maxVelocity: Velocities);
             device3.MoveTo(Zposition, 20000);
-            Console.WriteLine("Current Z position: {0}", device3.Position);
+            Console.WriteLine("Input Z velocity: {0}", Velocities);
+            Console.WriteLine("Final Z position: {0}", device3.Position);
         }
 
         static void Home1(KCubeDCServo device1)
