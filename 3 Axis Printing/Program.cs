@@ -248,11 +248,19 @@ namespace KDC101Console
                 if (yVel == 0)
                 {
                     yVel = 0.404m;
-                }
+                    decimal zTime = zPos / velocity;
 
-                if (zVel == 0)
-                {
+                    decimal longestTime = Math.Max(xTime, Math.Max(yTime, zTime));
+
                     zVel = 0.404m;
+                    decimal zTime = zPos / velocity;
+
+                    decimal longestTime = Math.Max(xTime, Math.Max(yTime, zTime));
+
+                    xVel = (decimal)(xPos / longestTime);
+                    yVel = (decimal)(yPos / longestTime);
+                    zVel = (decimal)(zPos / longestTime);
+
                 }
 
 
