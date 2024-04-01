@@ -13,6 +13,190 @@ using Thorlabs.MotionControl.DeviceManagerCLI;
 using Thorlabs.MotionControl.GenericMotorCLI.AdvancedMotor;
 using System.Xml.Serialization;
 
+namespace Gcode_Test
+{
+    class GCodeParser
+    {
+        static void Main()
+        {
+            // specify the path to the gcode file
+            string filePath = "gcodeTest.gcode";
+
+            // create a StreamReader object to read the gcode file
+            StreamReader reader = new StreamReader(filePath);
+
+            // create a StreamReader to count no. lines with G0/1/2/3
+
+            StreamReader lineCount = new StreamReader(filePath);
+
+            // count no. lines
+
+            int numLines = 0;
+
+            while (!lineCount.EndOfStream)
+            {
+                string line = lineCount.ReadLine();
+                Console.WriteLine(line);
+
+                if (line.StartsWith("G0 ") || line.StartsWith("G1 ") || line.StartsWith("G2 ") || line.StartsWith("G3 "))
+                {
+                    numLines++;
+                }
+            }
+
+            lineCount.Close();
+
+            // initialise variables
+
+            double[] xPos = new double[numLines];
+            double[] yPos = new double[numLines];
+            double[] zPos = new double[numLines];
+            int[] laser = new int[numLines];
+            double currentX = 0;
+            double currentY = 0;
+            int i = 0;
+
+            // read the file line by line and extract the position commands
+
+            while (!reader.EndOfStream)
+            {
+                string line = reader.ReadLine();
+                Console.WriteLine(line);
+                if (line.StartsWith("G1 "))
+                {
+                    // extract the x and y and z position values from the line
+                    if (line.Contains('X') && line.Contains('Y') && line.Contains('Z')) // Corrected: Use Contains to check if X and Y exist
+                    {
+                        double x = ExtractValue(line, 'X');
+                        double y = ExtractValue(line, 'Y');
+                        double z = ExtractValue(line, 'Z');
+
+                        // add the position values to the position arrays
+
+                        xPos[i] = x;
+                        yPos[i] = y;
+                        zPos[i] = z;
+                        laser[i] = 1;
+
+                        i++;
+                    }
+                }
+                else if (line.StartsWith("G0 "))
+                {
+                    double x = ExtractValue(line, 'X');
+                    double y = ExtractValue(line, 'Y');
+                    double z = ExtractValue(line, 'Z');
+
+                    // add the position values to the position arrays
+
+                    xPos[i] = x;
+                    yPos[i] = y;
+                    zPos[i] = z;
+                    laser[i] = 0;
+
+                    i++;
+
+                }
+                else if (line.StartsWith("G2 ") || line.StartsWith("G3 "))
+                {
+                    // extract the arc parameters from the line
+
+                    double centerX = ExtractValue(line, 'I') + currentX;
+                    double centerY = ExtractValue(line, 'J') + currentY;
+                    double endX = ExtractValue(line, 'X');
+                    double endY = ExtractValue(line, 'Y');
+                    double radius = Math.Sqrt(Math.Pow(centerX - currentX, 2) + Math.Pow(centerY - currentY, 2));
+
+                    // determine the start angle and end angle of the arc
+
+                    double startAngle = Math.Atan2(currentY - centerY, currentX - centerX);
+                    double endAngle = Math.Atan2(endY - centerY, endX - centerX);
+
+                    // handle clockwise and counterclockwise arcs separately
+
+                    if (line.StartsWith("G2 "))
+                    {
+                        // clockwise arc
+                        while (startAngle < endAngle)
+                        {
+                            // calculate the x and y coordinates of the current position on the arc
+                            double x = centerX + radius * Math.Cos(startAngle);
+                            double y = centerY + radius * Math.Sin(startAngle);
+
+                            // add the position values to the position vectors
+                            xPos[i] = x;
+                            yPos[i] = y;
+                            zPos[i] = zPos[i - 1];
+                            laser[i] = 1;
+                            i++;
+
+                            // increment the angle
+                            startAngle += 0.01;
+                        }
+                    }
+                    else
+                    {
+                        // counterclockwise arc
+                        while (startAngle > endAngle)
+                        {
+                            // calculate the x and y coordinates of the current position on the arc
+                            double x = centerX + radius * Math.Cos(startAngle);
+                            double y = centerY + radius * Math.Sin(startAngle);
+
+                            // add the position values to the position vectors
+                            xPos[i] = x;
+                            yPos[i] = y;
+                            zPos[i] = zPos[i - 1];
+                            laser[i] = 1;
+                            i++;
+
+                            // decrement the angle
+                            startAngle -= 0.01;
+                        }
+                    }
+                }
+            }
+
+            // close the reader
+            reader.Close();
+
+            // output the position arrays
+            Console.WriteLine("X position vector:");
+            for (int j = 0; j < i; j++)
+            {
+                Console.Write("{0} ", xPos[j]);
+            }
+            Console.WriteLine("\nY position vector:");
+            for (int j = 0; j < i; j++)
+            {
+                Console.Write("{0} ", yPos[j]);
+            }
+            Console.WriteLine("\nZ position vectors:");
+            for (int j = 0; j < i; j++)
+            {
+                Console.Write("{0} ", zPos[j]);
+            }
+            Console.WriteLine("\nlasing values:");
+            for (int j = 0; j < i; j++)
+            {
+                Console.Write("{0} ", laser[j]);
+            }
+
+            Console.ReadLine();
+        }
+
+        static double ExtractValue(string line, char axis)
+        {
+            int index = line.IndexOf(axis);
+            int endIndex = line.IndexOf(' ', index);
+            if (endIndex == -1)
+                endIndex = line.Length;
+            return double.Parse(line.Substring(index + 1, endIndex - index - 1));
+        }
+    }
+
+}
+
 
 namespace KDC101Console
 {
