@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO.Ports;
+using System.IO;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,11 +14,27 @@ using Thorlabs.MotionControl.DeviceManagerCLI;
 using Thorlabs.MotionControl.GenericMotorCLI.AdvancedMotor;
 using System.Xml.Serialization;
 
+
+namespace print
+{
+    class printProcess
+    {
+        static void Main()
+        {
+            Gcode_Test.GCodeParser.Main(new string[0]);
+
+            KDC101Console.Program.Main(new string[0]);
+
+        }
+    }
+}
+
+
 namespace Gcode_Test
 {
     class GCodeParser
     {
-        static void Main()
+        public static void Main(string[] args)
         {
             // specify the path to the gcode file
             string filePath = "gcodeTest.gcode";
@@ -161,7 +178,7 @@ namespace Gcode_Test
             reader.Close();
 
             // output the position arrays
-            Console.WriteLine("X position vector:");
+            Console.WriteLine("\nX position vector:");
             for (int j = 0; j < i; j++)
             {
                 Console.Write("{0} ", xPos[j]);
@@ -182,6 +199,8 @@ namespace Gcode_Test
                 Console.Write("{0} ", laser[j]);
             }
 
+            Console.WriteLine("\n\nGcode Converted Terminated");
+            Console.WriteLine("Press enter to continue");
             Console.ReadLine();
         }
 
@@ -203,39 +222,48 @@ namespace KDC101Console
     class Program
     {
 
-
-        // VARIABLES TO EDIT -----------------------------------------------------------------------------------------------
-
-        // declare if simulation
-        static bool SimulationTrue = true;
-
-        // positional positions - don't start any axis on 0  
-        decimal[] XpositionArray = { 0, 0, 5, 5, 10, 10, 15, 15, 20, 20, };
-        decimal[] YpositionArray = { 15, 25, 25, 15, 15, 25, 25, 15, 15, 25, };
-        decimal[] ZpositionArray = { 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, };
-
-        // power 1/0, start on 0
-        // velocity cannot = 0
-        byte[] PValuesArray = { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, };
-        decimal[] VelocityArray = { 2m, 2m, 1.5m, 1.5m, 1.798m, 1.798m, 0m, 0m, 0m, 0m };
-
-        // constant values
-        // velocity cannot = 0
-        decimal constantVelocity = 2;
-        decimal constantZPosition = 2.75m;
-
-        //choose if you want constant values
-        bool chooseConstantVelocity = false;
-        bool chooseConstantZPosition = true;
-
-
-        // -------------------------------------------------------------------------------------------------------
-
-
-        // declare the serial port
-        static SerialPort port;
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
+
+            // VARIABLES TO EDIT -----------------------------------------------------------------------------------------------
+
+
+            // System Info
+            // Processor x64
+
+            // declare if simulation
+            bool SimulationTrue = true;
+
+            // positional positions - don't start any axis on 0  
+            decimal[] XpositionArray = { 0, 0, 5, 5, 10, 10, 15, 15, 20, 20, };
+            decimal[] YpositionArray = { 15, 25, 25, 15, 15, 25, 25, 15, 15, 25, };
+            decimal[] ZpositionArray = { 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, };
+
+            // power 1/0, start on 0
+            // velocity cannot = 0, max v=2.3
+            byte[] PValuesArray = { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, };
+            decimal[] VelocityArray = { 2m, 2m, 1.5m, 1.5m, 1.798m, 1.798m, 0.78m, 0.342m, 3m, 2.48m };
+
+            // constant values
+            // velocity cannot = 0, max v=2.3
+            decimal constantVelocity = 2;
+            decimal constantZPosition = 2.75m;
+
+            //choose if you want constant values
+            bool chooseConstantVelocity = false;
+            bool chooseConstantZPosition = true;
+
+
+            // -------------------------------------------------------------------------------------------------------
+
+
+            // declare the serial port
+            SerialPort port;
+
+
+
+
+
             // initialise simulation
             if (SimulationTrue == true)
             {
@@ -384,12 +412,6 @@ namespace KDC101Console
             string answer = Console.ReadLine();
             Console.WriteLine("Now Proceeding");
 
-            if (SimulationTrue == false)
-            {
-                //SerialPort port
-                port = new SerialPort("COM3", 9600, Parity.None, 8, StopBits.One);
-            }
-
             // Iterate through XPositions and YPositions Simultaneously and Synchronously
             Console.WriteLine("Actuator is Moving");
 
@@ -423,7 +445,7 @@ namespace KDC101Console
                 xVel = (xPos / (longestDist / velocity));
                 yVel = (yPos / (longestDist / velocity));
                 zVel = (zPos / (longestDist / velocity));
-                
+
                 if (xVel == 0)
                 {
                     xVel = 0.404m;
@@ -432,19 +454,11 @@ namespace KDC101Console
                 if (yVel == 0)
                 {
                     yVel = 0.404m;
-                    decimal zTime = zPos / velocity;
+                }
 
-                    decimal longestTime = Math.Max(xTime, Math.Max(yTime, zTime));
-
+                if (zVel == 0)
+                {
                     zVel = 0.404m;
-                    decimal zTime = zPos / velocity;
-
-                    decimal longestTime = Math.Max(xTime, Math.Max(yTime, zTime));
-
-                    xVel = (decimal)(xPos / longestTime);
-                    yVel = (decimal)(yPos / longestTime);
-                    zVel = (decimal)(zPos / longestTime);
-
                 }
 
 
@@ -457,6 +471,7 @@ namespace KDC101Console
 
                 if (SimulationTrue == false)
                 {
+                    port = new SerialPort("COM3", 9600, Parity.None, 8, StopBits.One);
                     port.Open();
                     port.Write(pSend);
                     port.Close();
@@ -479,6 +494,7 @@ namespace KDC101Console
             if (SimulationTrue == false)
             {
                 // turn off laser
+                port = new SerialPort("COM3", 9600, Parity.None, 8, StopBits.One);
                 port.Open();
                 port.Write("0");
                 port.Close();
@@ -511,23 +527,23 @@ namespace KDC101Console
         }
         static void MoveX(KCubeDCServo device1, decimal Xposition, decimal Velocities)
         {
-            device1.SetVelocityParams(acceleration: 100, maxVelocity: Velocities);
-            device1.MoveTo(Xposition, 200000);
             Console.WriteLine("Input X velocity: {0}", Velocities);
+            device1.SetVelocityParams(acceleration: 3, maxVelocity: Velocities);
+            device1.MoveTo(Xposition, 200000);
             Console.WriteLine("Final X position: {0}", device1.Position);
         }
         static void MoveY(KCubeDCServo device2, decimal Yposition, decimal Velocities)
         {
-            device2.SetVelocityParams(acceleration: 100, maxVelocity: Velocities);
-            device2.MoveTo(Yposition, 200000);
             Console.WriteLine("Input Y velocity: {0}", Velocities);
+            device2.SetVelocityParams(acceleration: 3, maxVelocity: Velocities);
+            device2.MoveTo(Yposition, 200000);
             Console.WriteLine("Final Y position: {0}", device2.Position);
         }
         static void MoveZ(KCubeDCServo device3, decimal Zposition, decimal Velocities)
         {
-            device3.SetVelocityParams(acceleration: 100, maxVelocity: Velocities);
-            device3.MoveTo(Zposition, 200000);
             Console.WriteLine("Input Z velocity: {0}", Velocities);
+            device3.SetVelocityParams(acceleration: 3, maxVelocity: Velocities);
+            device3.MoveTo(Zposition, 200000);
             Console.WriteLine("Final Z position: {0}", device3.Position);
         }
 
@@ -557,3 +573,4 @@ namespace KDC101Console
         }
     }
 }
+
