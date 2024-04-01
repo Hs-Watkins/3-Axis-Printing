@@ -253,10 +253,21 @@ namespace KDC101Console
                 {
                     yVel = 0.404m;
                 }
-
+                }
                 if (zVel == 0)
                 {
+                {
+>>>>>>>>> Temporary merge branch 2
+                    zVel = 1m;
+=========
+
+>>>>>>>>> Temporary merge branch 2
+                {
+<<<<<<<<< Temporary merge branch 1
+                    zVel = 1m;
+=========
                     zVel = 0.404m;
+>>>>>>>>> Temporary merge branch 2
                 }
 
 
