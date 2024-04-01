@@ -32,19 +32,19 @@ namespace KDC101Console
             bool SimulationTrue = true;
 
             // positional positions - don't start any axis on 0  
-            decimal[] XpositionArray = { 0, 0, 5, 5, 10, 10, 15, 15, 20, 20, };
-            decimal[] YpositionArray = { 15, 25, 25, 15, 15, 25, 25, 15, 15, 25, };
-            decimal[] ZpositionArray = { 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, 2.75m, };
+            double[] XpositionArray = { 0, 0, 5, 5, 10, 10, 15, 15, 20, 20, };
+            double[] YpositionArray = { 15, 25, 25, 15, 15, 25, 25, 15, 15, 25, };
+            double[] ZpositionArray = { 2.75, 2.75, 2.75, 2.75, 2.75, 2.75, 2.75, 2.75, 2.75, 2.75, };
 
             // power 1/0, start on 0
             // velocity cannot = 0, max v=2.3
             byte[] PValuesArray = { 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, };
-            decimal[] VelocityArray = { 2m, 2m, 1.5m, 1.5m, 1.798m, 1.798m, 0.78m, 0.342m, 3m, 2.48m };
+            double[] VelocityArray = { 2, 2, 1.5, 1.5, 1.798, 1.798, 0.78, 0.342, 3, 2.48 };
 
             // constant values
             // velocity cannot = 0, max v=2.3
-            decimal constantVelocity = 2;
-            decimal constantZPosition = 2.75m;
+            double constantVelocity = 2;
+            double constantZPosition = 2.75;
 
             //choose if you want constant values
             bool chooseConstantVelocity = false;
@@ -68,11 +68,11 @@ namespace KDC101Console
             }
 
             // initialise variables
-            decimal zPosition = 1m;
-            decimal velocity = 1m;
-            decimal xVel = 1m;
-            decimal yVel = 1m;
-            decimal zVel = 1m;
+            double zPosition = 1;
+            double velocity = 1;
+            double xVel = 1;
+            double yVel = 1;
+            double zVel = 1;
 
             //  check to see if lengths are same
             try
@@ -245,17 +245,17 @@ namespace KDC101Console
 
                 if (xVel == 0)
                 {
-                    xVel = 0.404m;
+                    xVel = 0.404;
                 }
 
                 if (yVel == 0)
                 {
-                    yVel = 0.404m;
+                    yVel = 0.404;
                 }
 
                 if (zVel == 0)
                 {
-                    zVel = 0.404m;
+                    zVel = 0.404;
                 }
 
 
@@ -322,14 +322,14 @@ namespace KDC101Console
                 SimulationManager.Instance.UninitializeSimulations();
             }
         }
-        static void MoveX(KCubeDCServo device1, decimal Xposition, decimal Velocities)
+        static void MoveX(KCubeDCServo device1, double Xposition, double Velocities)
         {
             Console.WriteLine("Input X velocity: {0}", Velocities);
             device1.SetVelocityParams(acceleration: 3, maxVelocity: Velocities);
             device1.MoveTo(Xposition, 200000);
             Console.WriteLine("Final X position: {0}", device1.Position);
         }
-        static void MoveY(KCubeDCServo device2, decimal Yposition, decimal Velocities)
+        static void MoveY(KCubeDCServo device2, double Yposition, double Velocities)
         {
             Console.WriteLine("Input Y velocity: {0}", Velocities);
             device2.SetVelocityParams(acceleration: 3, maxVelocity: Velocities);
