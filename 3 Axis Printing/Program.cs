@@ -17,6 +17,11 @@ namespace KDC101Console
 {
     class Program
     {
+        // Device IDs //
+        static string serialNoX = "27505282"; // x
+        static string serialNoY = "27505360"; // y
+        static string serialNoZ = "27505370"; // z
+        // Device IDs //
 
         // Simulation? //
         static bool SimulationTrue = false;
@@ -246,6 +251,7 @@ namespace KDC101Console
 
             Console.WriteLine("Your print is finished. Press any key to exit");
             Console.ReadKey();
+        }
 
             if (SimulationTrue == true)
             {
