@@ -17,30 +17,21 @@ namespace KDC101Console
 {
     class Program
     {
-
-        // Simulation? //
-        static bool SimulationTrue = false;
-        // Simulation? //
-
         // Device IDs //
         static string serialNoX = "27505282"; // x
         static string serialNoY = "27505360"; // y
         static string serialNoZ = "27505370"; // z
-                                              // Device IDs //
+        // Device IDs //
 
-        // Path // beware, the x actuator seems to give up near 0, I recommend starting at (10, 10)
-        //static double[] XpositionArray = { 10,   10,   10.05,10.05,10.10,10.10,10.15,10.15,10.20,10.20,10.25,10.25,10.29,10.29,10.33,10.33,10.37,10.37,10.41,10.41,10.45,10.45,10.48,10.48,10.51,10.51,10.54,10.54,10.57,10.57,10.60,10.60,10.62,10.62,10.64,10.64,10.66,10.66,10.68,10.68,10.70,10.70,10.71,10.71,10.72,10.72,10.73,10.73,10.74,10.74,10.75,10.75 };
-        //static double[] YpositionArray = { 10,   20,   20,   10,   10,   20,   20,   10,   10,   20,   20,   10,   10,   20,   20,   10,   10,   20,   20,   10,   10,   20,   20,   10,   10,   20,   20,   10,   10,   20,   20,   10,   10,   20,   20,   10,   10,   20,   20,   10,   10,   20,   20,   10,   10,   20,   20,   10,   10,   20,   20,   10   };
-        //static double[] ZpositionArray = { 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19, 4.19 };
-        //static byte[] PValuesArray =     { 0,    1,    0,    1,    0,    1,    0,    1,    0,    1,    0,    1,    0,    1,    0,    1,    0,    1,    0,    1,    0,    1,    0,    1,    0,    1,    0,    1,    0,    1,    0,    1,    0,    1,    0,    1,    0,    1,    0,    1,    0,    1,    0,    1,    0,    1,    0,    1,    0,    1,    0,    1    };
-        //static double[] VelocityArray =  { 2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0,  2.0  };
+        // Simulation? //
+        static bool SimulationTrue = false;
+     
 
         //static double[] XpositionArray = { };
         //static double[] YpositionArray = { };
         //static double[] ZpositionArray = { };
         //static byte[] PValuesArray = { };
         //static double[] VelocityArray = { };
-
 
         // X-Diagonal
         //static double[] XpositionArray = {1,   5,   20,   5,   20 };
@@ -252,6 +243,9 @@ namespace KDC101Console
                 SimulationManager.Instance.UninitializeSimulations();
             }
         }
+
+    
+
 
         static void Move(KCubeDCServo device, double pos, double velo)
         {
