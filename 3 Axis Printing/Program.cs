@@ -183,27 +183,31 @@ namespace KDC101Console
                 Console.WriteLine($"Total Vel: {VelocityArray[i]}");
                 Console.WriteLine($"Laser: {PValuesArray[i]}");
 
-                if (i>0 && (ZpositionArray[i] == ZpositionArray[i - 1]))
+                if (i > 0 && ZpositionArray[i] == ZpositionArray[i - 1])
                 {
                     Console.WriteLine("Z Stationary");
-                    MoveXThread.Start();
-                    MoveYThread.Start();
-                    // Wait for Move to Finish
-                    MoveXThread.Join();
-                    MoveYThread.Join();
-                    Console.WriteLine("");
                 }
                 else
                 {
-                    MoveXThread.Start();
-                    MoveYThread.Start();
                     MoveZThread.Start();
-                    // Wait for Move to Finish
-                    MoveXThread.Join();
-                    MoveYThread.Join();
-                    MoveZThread.Join();
-                    Console.WriteLine("");
                 }
+
+                // Start X and Y threads (common for both cases)
+                MoveXThread.Start();
+                MoveYThread.Start();
+
+                // Wait for X and Y threads to finish
+                MoveXThread.Join();
+                MoveYThread.Join();
+
+                // Wait for Z thread to finish if it was started
+                if (!(i > 0 && ZpositionArray[i] == ZpositionArray[i - 1]))
+                {
+                    MoveZThread.Join();
+                }
+
+                Console.WriteLine("");
+
             }
 
             // Step 5. Shutdown.
