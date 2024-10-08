@@ -161,22 +161,31 @@ namespace KDC101Console
                 if (xVel == 0) { xVel = 0.0001; }
                 if (yVel == 0) { yVel = 0.0001; }
                 if (zVel == 0) { zVel = 0.0001; }
-                // setup the moving threads
-                Thread MoveXThread = new Thread(() => Move(deviceX, XpositionArray[i], xVel));
-                Thread MoveYThread = new Thread(() => Move(deviceY, YpositionArray[i], yVel));
-                Thread MoveZThread = new Thread(() => Move(deviceZ, ZpositionArray[i], zVel));
-                // toggle the laser
 
+                // add time offset
+                double offset = 0.5;
+                double distanceAddedX = offset * xVel;
+                double distanceAddedY = offset * yVel;
+
+
+                // setup the moving threads
+                Thread MoveXThread = new Thread(() => Move(deviceX, (XpositionArray[i]+distanceAddedX), xVel));
+                Thread MoveYThread = new Thread(() => Move(deviceY, (YpositionArray[i]+distanceAddedY), yVel));
+                Thread MoveZThread = new Thread(() => Move(deviceZ, ZpositionArray[i], zVel));
+                
+                // toggle the laser
                 if (SimulationTrue == false)
                 {
                     SerialPort port = new SerialPort("COM3", 9600, Parity.None, 8, StopBits.One);
                     port.Open();
-                    port.Write(PValuesArray[i].ToString());
+                    string dataToSend = PValuesArray[i].ToString() + " " + offset.ToString() + " " + xVel.ToString() + " " + xDel.ToString() + "\n";
+                    port.Write(dataToSend);
                     port.Close();
                 }
 
                 // it's moving time
                 Console.WriteLine($"Move {i+1}/{XpositionArray.Length} Executing\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=");
+                Console.WriteLine($"Timing Offset: {offset:0.####}");
                 Console.WriteLine($"X: from {deviceX.Position:0.####} to {XpositionArray[i]:0.####} at {xVel:0.####}");
                 Console.WriteLine($"Y: from {deviceY.Position:0.####} to {YpositionArray[i]:0.####} at {yVel:0.####}");
                 Console.WriteLine($"Z: from {deviceZ.Position:0.####} to {ZpositionArray[i]:0.####} at {zVel:0.####}");
