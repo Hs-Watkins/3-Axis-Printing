@@ -215,7 +215,18 @@ namespace KDC101Console
                     MoveZThread.Join();
                 }
 
-                Console.WriteLine("");
+                Console.WriteLine("Actual Pos");
+
+                Console.WriteLine($"X:  {deviceX.Position:0.####}");
+                Console.WriteLine($"Y:  {deviceY.Position:0.####}");
+                Console.WriteLine($"Z:  {deviceZ.Position:0.####}");
+
+
+
+
+                Console.WriteLine("Click enter to go next..."); 
+                string answer5 = Console.ReadLine();
+               
 
             }
 
@@ -263,6 +274,7 @@ namespace KDC101Console
         static void Move(KCubeDCServo device, double pos, double velo)
         {
             device.SetVelocityParams(acceleration: 3, maxVelocity: (decimal)velo);
+            device.SetBacklash_DeviceUnit(0);
             device.MoveTo((decimal)pos, 20000000);
         }
 
